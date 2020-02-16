@@ -1,0 +1,46 @@
+runtime: go113
+
+main: gosrv
+
+inbound_services:
+- warmup
+
+env_variables:
+    GCLOUD_AUD: ''
+    JWT_SECRET: 'KaNdRgUkXp2s5v8y/B?E(H+MbQeShVmYq3t6w9z$C&F)J@NcRfUjWnZr4u7x!A%D'
+    JWT_DURATION_SEC: '7000'
+    JWT_REFRESH_SEC: '120'
+    ADMIN_SID : '104040473992413612315'
+
+handlers:
+- url: /(.*\.html)$
+  mime_type: text/html
+  static_files: gosrv/dist/spaapp/\1
+  upload: gosrv/dist/spaapp/(.*\.html)$
+
+- url: /(.*\.js)$
+  mime_type: text/javascript
+  static_files: gosrv/dist/spaapp/\1
+  upload: gosrv/dist/spaapp/(.*\.js)$
+
+- url: /(.*\.css)$
+  mime_type: text/css
+  static_files: gosrv/dist/spaapp/\1
+  upload: gosrv/dist/spaapp/(.*\.css)$
+  
+- url: /(.*\.(ico|eot|svg|ttf|woff|woff2))$
+  static_files: gosrv/dist/spaapp/\1
+  upload: gosrv/dist/spaapp/.*\.(ico|eot|svg|ttf|woff|woff2)$
+
+- url: /assets/images/(.*\.png)$
+  static_files: gosrv/dist/spaapp/assets/images/\1
+  upload: gosrv/dist/spaapp/assets/images/(.*\.png)$
+  
+- url: /assets/images/(.*\.jpg)$
+  static_files: gosrv/dist/spaapp/assets/images/\1
+  upload: gosrv/dist/spaapp/assets/images/(.*\.jpg)$
+
+- url: /.*
+  script: auto
+  secure: always
+  redirect_http_response_code: 301
