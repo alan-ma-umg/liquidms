@@ -7,6 +7,9 @@
     "build": "cd ngapp && ng build --watch",
     "build-prod": "cd ngapp && ng build --prod --build-optimizer=true --vendor-chunk=true",
     "postinstall": "cd ngapp && npm install",
+    "datastore-init": "gcloud beta emulators datastore env-init",
+    "datastore-start": "gcloud beta emulators datastore start",
+    "datastore": "npm run datastore-init && npm run datastore-start",
     "deploy": "gcloud app deploy"
   },
   "browserslist": [
