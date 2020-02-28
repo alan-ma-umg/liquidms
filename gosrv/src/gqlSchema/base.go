@@ -19,6 +19,8 @@ var Schema = `
     sessionDetail(): SessionDetail
     # Get Current User Details
     getUser(): UserDetail
+    # Get Item By RefId
+    getItem(lookup: ItemFilter!): ItemDetail
   }
 
   # Mutation requsts. Upsert fields
@@ -60,5 +62,36 @@ var Schema = `
     # User picture link
     pictureURL: String!
   }
+
+  # Item Detail
+  type ItemDetail{
+    # Item ID
+    id: String!
+    # Item Parent ID
+    parentId: String!
+    # Item Type
+    type: String!
+    # Item Value
+    value: String!
+    # Item Color
+    color: String!
+    # Item Image
+    image: String!
+    # Item External ID    
+    extID: String!
+    # Item External URL
+    extURL: String!
+    # Item ExtSync
+    extSync: String!
+  }
+
+  # Get Item Filter 
+  input ItemFilter {
+    id: String!
+    type: String!
+    parentId: String!
+    idType: String!
+  }
+
 `
 
