@@ -29,6 +29,8 @@ var Schema = `
     sessionDetail(): SessionDetail
     # Refresh Current User Details
     getUser(): UserDetail
+    # Update CCBRecords
+    updateCCB(params: UpdateType!): [ItemDetail]
   }
 
   type HealthDetail {
@@ -64,7 +66,7 @@ var Schema = `
   }
 
   # Item Detail
-  type ItemDetail{
+  type ItemDetail {
     # Item ID
     id: String!
     # Item Parent ID
@@ -93,5 +95,9 @@ var Schema = `
     idType: String!
   }
 
+  # Update Airtable Input
+  input UpdateType {
+    ccbType: String!
+  }
 `
 

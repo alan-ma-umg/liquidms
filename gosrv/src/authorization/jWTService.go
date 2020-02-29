@@ -107,7 +107,7 @@ func RefreshJWTSession(c helper.ContextDetail, aud string, jti string) (JWTPaylo
   jwtDurationSec := GetJWTDurationSec();
   
   if loadError != nil {
-    helper.Log(c, "error", "Loading JWTSession", "error", loadError.Error())
+    return *NullJWTPayload, loadError
   }
 
   if jwtPayload.Jti != jti {        

@@ -108,27 +108,44 @@ func LoadItemsByType(ctx context.Context, itemType string, parentID string) (*[]
   
   return &foundRecords, nil
 }
-/*
-func LoadItemDetailByExtID(ctx context.Context, extID string) (*ItemDetail, error) {
+
+func LoadItemByExtID(ctx context.Context, itemType string, extID string) (*ItemModel, error) {
+  dsClient, err := datastore.NewClient(ctx, "liquidms")
+  if err != nil {
+		return nil, err
+	}
+  defer dsClient.Close()
+  
   dbKind := "ItemDetail"
   
-  var foundRecords []ItemDetail
+  var foundRecords []ItemModel
   
   query := datastore.NewQuery(dbKind).
+           Filter("Type =", itemType).
            Filter("ExtID =", extID)
   
-  if _, err := query.GetAll(ctx, &foundRecords); err != nil {
-    return nil, err
+  transaction := dsClient.Run(ctx, query)
+  
+  for {
+    var x ItemModel
+    _, err := transaction.Next(&x)
+    if err == iterator.Done {
+      break
+    }
+    if err != nil {
+      return nil, err
+    }
+    foundRecords = append(foundRecords, x)
   }
   
   if len(foundRecords) == 0 {
-    foundRecords = append(foundRecords, *NullItemDetail)
+    return NullItem, nil
+  } else {
+    return &foundRecords[0], nil
   }
   
-  foundRecords[0].Description = string(foundRecords[0].ByteDescription)
-  return &foundRecords[0], nil  
 }
-
+/*
 func LoadItemDetailByETP(ctx context.Context, extID string, itemType string, parentID string) (*ItemDetail, error) {
   dbKind := "ItemDetail"
   
@@ -150,5 +167,14 @@ func LoadItemDetailByETP(ctx context.Context, extID string, itemType string, par
   foundRecords[0].Description = string(foundRecords[0].ByteDescription)
   return &foundRecords[0], nil  
 }
+/*
+  query := datastore.NewQuery(dbKind).
+           Filter("ExtID =", extID)
+
+query := datastore.NewQuery(dbKind).
+           Filter("ExtID =", extID).
+           Filter("Type =", itemType).
+           Filter("ParentID =", parentID)
+
 
 */

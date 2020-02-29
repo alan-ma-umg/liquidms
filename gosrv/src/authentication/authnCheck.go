@@ -89,7 +89,7 @@ func AuthnCheck(next http.Handler) http.Handler {
       // sessionToken = RefreshJWTSession(c, jwtPayload.Aud, jwtPayload.Jti)
       jwtPayload, err = authorization.RefreshJWTSession(c, jwtPayload.Aud, jwtPayload.Jti)
       if err != nil {
-        helper.Log(c, "error", "JWT Refresh", "error", err.Error()) 
+        helper.Log(c, "error", "JWT Refresh", "error", err.Error())
       }
     }
     next.ServeHTTP(w, requestWithAppengineContext(r, c.Ctx, jwtPayload))

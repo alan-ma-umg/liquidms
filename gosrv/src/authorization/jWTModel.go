@@ -39,7 +39,7 @@ var NullAuthPayload = &AuthPayload {
 */
 
 var NullJWTPayload = &JWTPayload {
-  Sub: "",
+  Sub: "00000000000000000000000000",
   Aud: "",
   Jti: "",
   Iat: int64(0),
@@ -47,7 +47,7 @@ var NullJWTPayload = &JWTPayload {
   Txn: "",
   Sid: "",
   Scope: nil,
-  CID: "",
+  CID: "00000000000000000000000000",
 }
 
 func SaveJWTPayload(ctx context.Context, indexKey string, saveRecord *JWTPayload) error {
