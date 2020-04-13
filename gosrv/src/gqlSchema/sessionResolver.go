@@ -63,7 +63,7 @@ func (r *sessionDetailResolver) UserID() string {
 
 func (r *sessionDetailResolver) Status() string {
   if (r.uID == "00000000000000000000000000" || r.uID == "") {
-    return "Unauthorized"
+    return "Unauthorized"  
   } else {
     if r.isRefresh {
       return "Refresh"
@@ -78,5 +78,13 @@ func (r *sessionDetailResolver) Expiration() int32 {
     return int32(0)
   } else {
     return r.eXP
+  }
+}
+
+func (r *sessionDetailResolver) CheckinID() string {
+  if r.uID == "00000000000000000000000001" {
+    return "00000000000000000000000000"
+  } else {
+    return ""
   }
 }

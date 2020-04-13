@@ -11,7 +11,7 @@ type ItemModel struct {
   ID              string
   ParentID        string
   Type            string
-  Value           string `datastore:",noindex"`
+  Value           string
   Color           string
   Image           string
   ExtID           string
@@ -35,13 +35,7 @@ var NullItem = &ItemModel {
   UpdatedTime: time.Now(),
 }
 
-func SaveItem(ctx context.Context, indexKey string, saveRecord *ItemModel) error {
-  dsClient, err := datastore.NewClient(ctx, "liquidms")
-  if err != nil {
-		return err
-	}
-  defer dsClient.Close()
-  
+func SaveItem(ctx context.Context, dsClient datastore.Client, indexKey string, saveRecord *ItemModel) error {
   dbKind := "ItemDetail"
 
   //saveRecord.ByteDescription = []byte(saveRecord.Description)
@@ -54,13 +48,7 @@ func SaveItem(ctx context.Context, indexKey string, saveRecord *ItemModel) error
   return nil
 }
 
-func LoadItem(ctx context.Context, indexKey string) (*ItemModel, error) {
-  dsClient, err := datastore.NewClient(ctx, "liquidms")
-  if err != nil {
-		return NullItem, err
-	}
-  defer dsClient.Close()
-  
+func LoadItem(ctx context.Context, dsClient datastore.Client, indexKey string) (*ItemModel, error) {  
   dbKind := "ItemDetail"
   key := datastore.NameKey(dbKind, indexKey, nil)
 
@@ -73,13 +61,7 @@ func LoadItem(ctx context.Context, indexKey string) (*ItemModel, error) {
   return e, nil
 }
 
-func LoadItemsByType(ctx context.Context, itemType string, parentID string) (*[]ItemModel, error) {
-  dsClient, err := datastore.NewClient(ctx, "liquidms")
-  if err != nil {
-		return nil, err
-	}
-  defer dsClient.Close()
-  
+func LoadItemsByType(ctx context.Context, dsClient datastore.Client, itemType string, parentID string) (*[]ItemModel, error) {
   dbKind := "ItemDetail"
   
   var foundRecords []ItemModel
@@ -109,13 +91,7 @@ func LoadItemsByType(ctx context.Context, itemType string, parentID string) (*[]
   return &foundRecords, nil
 }
 
-func LoadItemByExtID(ctx context.Context, itemType string, extID string) (*ItemModel, error) {
-  dsClient, err := datastore.NewClient(ctx, "liquidms")
-  if err != nil {
-		return nil, err
-	}
-  defer dsClient.Close()
-  
+func LoadItemByExtID(ctx context.Context, dsClient datastore.Client, itemType string, extID string) (*ItemModel, error) {
   dbKind := "ItemDetail"
   
   var foundRecords []ItemModel
@@ -145,6 +121,38 @@ func LoadItemByExtID(ctx context.Context, itemType string, extID string) (*ItemM
   }
   
 }
+
+func LoadItemByValue(ctx context.Context, dsClient datastore.Client, itemType string, value string) (*ItemModel, error) {  
+  dbKind := "ItemDetail"
+  
+  var foundRecords []ItemModel
+  
+  query := datastore.NewQuery(dbKind).
+           Filter("Type =", itemType).
+           Filter("Value =", value)
+  
+  transaction := dsClient.Run(ctx, query)
+  
+  for {
+    var x ItemModel
+    _, err := transaction.Next(&x)
+    if err == iterator.Done {
+      break
+    }
+    if err != nil {
+      return nil, err
+    }
+    foundRecords = append(foundRecords, x)
+  }
+  
+  if len(foundRecords) == 0 {
+    return NullItem, nil
+  } else {
+    return &foundRecords[0], nil
+  }
+  
+}
+
 /*
 func LoadItemDetailByETP(ctx context.Context, extID string, itemType string, parentID string) (*ItemDetail, error) {
   dbKind := "ItemDetail"

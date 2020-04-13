@@ -1,8 +1,10 @@
 package gqlSchema
 
 import (
+  "errors"
   "context"
-
+  "cloud.google.com/go/datastore"
+  
   "X/gosrv/src/helper"
   "X/gosrv/src/model"
   "X/gosrv/src/authorization"
@@ -27,6 +29,14 @@ func (r *Resolver) GetItem(ctx context.Context, args *struct{Lookup itemFilter})
   }  
   helper.Log(c, "info", "Started")  
 
+  dsClient, err := datastore.NewClient(ctx, "liquidms")
+  if err != nil {
+		return nil, err
+	}
+  defer dsClient.Close()
+  
+  c.Dsc = *dsClient
+  
   helper.Log(c, "info", "Item Lookup", "uid", c.UID, )
 
   var foundItem *model.ItemModel
@@ -35,7 +45,7 @@ func (r *Resolver) GetItem(ctx context.Context, args *struct{Lookup itemFilter})
   switch args.Lookup.IdType {
     case "Int":
       helper.Log(c, "info", "Item Lookup by Item ID", "uid", c.UID, "itemId", args.Lookup.Id)    
-      foundItem, loadItemErr = model.LoadItem(c.Ctx, args.Lookup.Id)
+      foundItem, loadItemErr = model.LoadItem(c.Ctx, c.Dsc, args.Lookup.Id)
     default:
       helper.Log(c, "warning", "IdType not valid", "uid", c.UID, "id", args.Lookup.Id)
       foundItem = model.NullItem
@@ -55,6 +65,61 @@ func (r *Resolver) GetItem(ctx context.Context, args *struct{Lookup itemFilter})
 
   return &itemResolver{c, foundItem}, nil
 }
+
+func (r *Resolver) GetItems(ctx context.Context, args *struct{Lookup itemFilter}) (*[]*itemResolver, error) {
+  jwtPayload := ctx.Value("JWT").(authorization.JWTPayload)
+  c := helper.ContextDetail {
+      Ctx: ctx.Value("GAE").(context.Context),
+      FunctionName: "Items Resolver",
+      TranID: jwtPayload.Txn,
+      UID: jwtPayload.Sub,
+      CID: jwtPayload.CID,
+      ProductID: "",
+  }  
+  helper.Log(c, "info", "Started")  
+
+  dsClient, err := datastore.NewClient(ctx, "liquidms")
+  if err != nil {
+		return nil, err
+	}
+  defer dsClient.Close()
+  
+  c.Dsc = *dsClient
+  
+  helper.Log(c, "info", "Item Lookup", "uid", c.UID, )
+
+  var itemsResolver []*itemResolver
+
+  if args.Lookup.IdType == "" {
+    err := errors.New("ID Type Required")
+    itemsResolver = append(itemsResolver, &itemResolver{c, model.NullItem})
+    return &itemsResolver, err
+  }
+  
+  if args.Lookup.ParentId == "" {
+    args.Lookup.ParentId = "00000000000000000000000000"
+  }
+  
+  foundItems, err := model.LoadItemsByType(c.Ctx, c.Dsc, args.Lookup.IdType, args.Lookup.ParentId)
+  
+  if err != nil {
+    itemsResolver = append(itemsResolver, &itemResolver{c, model.NullItem})
+    return &itemsResolver, err
+  }
+  
+  if len(*foundItems) > 0 {
+    for _, foundItem := range *foundItems {
+      itemsResolver = append(itemsResolver, &itemResolver{c, &foundItem})
+    }
+  } else {
+    itemsResolver = append(itemsResolver, &itemResolver{c, model.NullItem})
+  }
+  
+  helper.Log(c, "info", "Completed")
+
+  return &itemsResolver, nil
+}
+
 
 type itemResolver struct {
   c helper.ContextDetail

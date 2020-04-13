@@ -8,11 +8,13 @@ import (
   mRand "math/rand"
   "encoding/base64"
   "github.com/oklog/ulid"
-  "cloud.google.com/go/logging"  
+  "cloud.google.com/go/logging"
+  "cloud.google.com/go/datastore"
 )
 
 type ContextDetail struct {
   Ctx context.Context
+  Dsc datastore.Client
   FunctionName string
   TranID string
   UID string

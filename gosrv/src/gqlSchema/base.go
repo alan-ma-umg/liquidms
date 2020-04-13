@@ -17,10 +17,14 @@ var Schema = `
     health(): HealthDetail
     # Get Session Details
     sessionDetail(): SessionDetail
+    # Get Checkin Details
+    checkinDetail(pin: String!): SessionDetail
     # Get Current User Details
     getUser(): UserDetail
     # Get Item By RefId
     getItem(lookup: ItemFilter!): ItemDetail
+    # Get Items By Type
+    getItems(lookup: ItemFilter!): [ItemDetail]
   }
 
   # Mutation requsts. Upsert fields
@@ -49,6 +53,8 @@ var Schema = `
     status: String!
     # Session Expiration timer in sec
     expiration: Int!
+    # Checkin Session ID
+    checkinID: String!
   }  
   
   # User information
@@ -98,6 +104,7 @@ var Schema = `
   # Update Airtable Input
   input UpdateType {
     ccbType: String!
+    parentID: String!
   }
 `
 
